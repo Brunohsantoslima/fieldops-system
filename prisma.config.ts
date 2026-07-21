@@ -1,10 +1,11 @@
-import { defineConfig } from '@prisma/config'
+import { defineConfig } from '@prisma/config';
+import 'dotenv/config';
 
 export default defineConfig({
-  datasource: {
-    url: process.env.DATABASE_URL, // 👈 Garanta que esta linha existe aqui
-  },
   migrations: {
-    seed: 'npx.cmd tsx ./prisma/seed.ts',
+    seed: 'npx tsx prisma/seed.ts', // 👈 Nova configuração do seed aqui!
   },
-})
+  datasource: {
+    url: process.env.DATABASE_URL as string,
+  }
+});

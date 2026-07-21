@@ -1,9 +1,12 @@
 datasource db {
   provider = "postgresql"
+ 
+  
 }
 
 generator client {
   provider = "prisma-client-js"
+  engineType = "library"
 }
 
 enum Role {
@@ -53,6 +56,9 @@ model WorkOrder {
   checklist       ChecklistItem[]
   events          WorkOrderEvent[]
 
+  @@index([status])
+  @@index([assigneeId])
+  @@index([teamId])
   @@map("flx_work_orders")
 }
 

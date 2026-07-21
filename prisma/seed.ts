@@ -1,37 +1,64 @@
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
-import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
+import pg from 'pg';
+import 'dotenv/config';
+import bcrypt from 'bcrypt';
 
-// 1. Configurando a conexão nativa via Pool para o Seed
-const connectionString = process.env.DATABASE_URL;
-const pool = new Pool({ connectionString });
+// Cria a piscina de conexões com o driver 'pg' e o adaptador do Prisma
+const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 
-// 2. Instanciando o Prisma com o adapter
+// Inicializa o Prisma Client passando o adapter obrigatório do Prisma 7
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  console.log('🌱 [FieldOps] Iniciando a semeadura do banco de dados...');
-
-  // Criptografando a senha antes de salvar no banco!
+  // ... mantenha aqui o seu código de inserção dos usuários
+  // ... seu código de criação de usuários continua aqui embaixo
+ 
   const hashedPassword = await bcrypt.hash('password123', 10);
 
-  // Usa upsert para criar se não existir, ou atualizar se já existir
-  await prisma.user.upsert({
-    where: { email: 'admin@fieldops.com' },
-    update: {
-      password: hashedPassword // Atualiza a senha para a versão criptografada
-    },
-    create: {
-      email: 'admin@fieldops.com',
-      name: 'Admin FieldOps',
+  const users = [
+    {
+      email: 'tech-a@fieldops.eval',
+      name: 'Técnico A',
       password: hashedPassword,
-      role: 'admin'
-    }
-  });
+      role: 'technician' as const,
+      teamId: 'team-alpha',
+    },
+    {
+      email: 'tech-b@fieldops.eval',
+      name: 'Técnico B',
+      password: hashedPassword,
+      role: 'technician' as const,
+      teamId: 'team-beta',
+    },
+    {
+      email: 'supervisor-a@fieldops.eval',
+      name: 'Supervisor A',
+      password: hashedPassword,
+      role: 'supervisor' as const,
+      teamId: 'team-alpha',
+    },
+    {
+      email: 'admin@fieldops.eval',
+      name: 'Administrador',
+      password: hashedPassword,
+      role: 'admin' as const,
+      teamId: null, // Admin não tem equipe
+    },
+  ];
 
-  console.log('✅ [FieldOps] Banco de dados populado com sucesso!');
+  console.log('🌱 Iniciando o seed...');
+
+  for (const user of users) {
+    await prisma.user.upsert({
+      where: { email: user.email },
+      update: {},
+      create: user,
+    });
+  }
+
+  console.log('✅ Seed concluído! Usuários criados com sucesso.');
 }
 
 main()
@@ -41,5 +68,4 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect();
-    await pool.end(); // Fechando o pool de conexão para o script não ficar travado
   });
