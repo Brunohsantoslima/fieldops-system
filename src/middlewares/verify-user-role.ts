@@ -1,13 +1,16 @@
+// src/middlewares/verify-user-role.ts
 import { FastifyReply, FastifyRequest } from 'fastify';
 
-export function verifyUserRole(allowedRoles: Array<'ADMIN' | 'SUPERVISOR' | 'TECHNICIAN'>) {
-  return async (request: FastifyRequest, reply: FastifyReply) => {
-    const { role } = request.user;
+type Role = 'admin' | 'supervisor' | 'technician';
 
-    if (!allowedRoles.includes(role as any)) {
-      return reply.status(403).send({
-        error: 'FLX_FORBIDDEN',
-        message: 'Acesso negado. Você não possui permissão para executar esta ação.',
+export function verifyUserRole(rolesToAllow: Role[]) {
+  return async (request: FastifyRequest, reply: FastifyReply) => {
+    // Pega o papel extraído pelo jwtVerify()
+    const { role } = request.user as { role: Role };
+
+    if (!rolesToAllow.includes(role)) {
+      return reply.status(403).send({ 
+        message: 'Acesso negado: você não tem permissão para realizar esta ação.' 
       });
     }
   };

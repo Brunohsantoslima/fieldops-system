@@ -1,64 +1,66 @@
-import { PrismaClient } from '@prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
-import pg from 'pg';
-import 'dotenv/config';
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 
-// Cria a piscina de conexões com o driver 'pg' e o adaptador do Prisma
-const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
-const adapter = new PrismaPg(pool);
-
-// Inicializa o Prisma Client passando o adapter obrigatório do Prisma 7
-const prisma = new PrismaClient({ adapter });
+// ⚠️ AJUSTE ESTE CAMINHO: Aponte para o arquivo onde você exportou o prisma no seu backend
+import { prisma } from '../src/lib/prisma.js';
 
 async function main() {
-  // ... mantenha aqui o seu código de inserção dos usuários
-  // ... seu código de criação de usuários continua aqui embaixo
- 
-  const hashedPassword = await bcrypt.hash('password123', 10);
+  console.log('Iniciando seed seguro...');
 
-  const users = [
-    {
-      email: 'tech-a@fieldops.eval',
-      name: 'Técnico A',
-      password: hashedPassword,
-      role: 'technician' as const,
+  // A prova exige que a senha seja "password123"
+  const passwordHash = await bcrypt.hash('password123', 10);
+
+  // 1. Admin
+  await prisma.user.upsert({
+    where: { email: 'admin@fieldops.eval' },
+    update: {}, // Se já existir, não altera nada
+    create: {
+      name: 'Administrador',
+      email: 'admin@fieldops.eval',
+      password: passwordHash,
+      role: 'admin',
+    },
+  });
+
+  // 2. Supervisor (team-alpha)
+  await prisma.user.upsert({
+    where: { email: 'supervisor-a@fieldops.eval' },
+    update: {},
+    create: {
+      name: 'Supervisor A',
+      email: 'supervisor-a@fieldops.eval',
+      password: passwordHash,
+      role: 'supervisor',
       teamId: 'team-alpha',
     },
-    {
-      email: 'tech-b@fieldops.eval',
+  });
+
+  // 3. Técnico A (team-alpha)
+  await prisma.user.upsert({
+    where: { email: 'tech-a@fieldops.eval' },
+    update: {},
+    create: {
+      name: 'Técnico A',
+      email: 'tech-a@fieldops.eval',
+      password: passwordHash,
+      role: 'technician',
+      teamId: 'team-alpha',
+    },
+  });
+
+  // 4. Técnico B (team-beta)
+  await prisma.user.upsert({
+    where: { email: 'tech-b@fieldops.eval' },
+    update: {},
+    create: {
       name: 'Técnico B',
-      password: hashedPassword,
-      role: 'technician' as const,
+      email: 'tech-b@fieldops.eval',
+      password: passwordHash,
+      role: 'technician',
       teamId: 'team-beta',
     },
-    {
-      email: 'supervisor-a@fieldops.eval',
-      name: 'Supervisor A',
-      password: hashedPassword,
-      role: 'supervisor' as const,
-      teamId: 'team-alpha',
-    },
-    {
-      email: 'admin@fieldops.eval',
-      name: 'Administrador',
-      password: hashedPassword,
-      role: 'admin' as const,
-      teamId: null, // Admin não tem equipe
-    },
-  ];
+  });
 
-  console.log('🌱 Iniciando o seed...');
-
-  for (const user of users) {
-    await prisma.user.upsert({
-      where: { email: user.email },
-      update: {},
-      create: user,
-    });
-  }
-
-  console.log('✅ Seed concluído! Usuários criados com sucesso.');
+  console.log('✅ Usuários oficiais da prova gerados com sucesso!');
 }
 
 main()

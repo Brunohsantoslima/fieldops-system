@@ -1,32 +1,39 @@
 import Fastify, { FastifyRequest, FastifyReply } from 'fastify';
 import fastifyJwt from '@fastify/jwt';
 import { workOrdersRoutes } from './modules/work-orders/work-orders.routes.js';
+import { authRoutes } from './modules/auth/auth.routes.js';
+import { webhooksRoutes } from './modules/webhooks/webhooks.routes.js'; // 👈 1. Import do Webhook
+import { errorHandler } from './error-handler.js';
 
 const app = Fastify({ logger: true });
 
-// ⚡ Fail-Fast: Impede a aplicação de subir vulnerável sem JWT_SECRET
+app.setErrorHandler(errorHandler);
+
 const jwtSecret = process.env.JWT_SECRET;
 if (!jwtSecret) {
   console.error('❌ ERRO FATAL: A variável de ambiente JWT_SECRET não está definida.');
   process.exit(1);
 }
 
-// Registrar Plugin JWT
 app.register(fastifyJwt, {
   secret: jwtSecret,
 });
 
-// Decorator global para autenticação (parâmetros tipados explicitamente)
 app.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply) => {
   try {
     await request.jwtVerify();
   } catch (err) {
-    return reply.status(401).send({ error: 'Não autorizado. Token ausente ou inválido.' });
+    return reply.status(401).send({ 
+      error: 'FLX_UNAUTHORIZED', 
+      message: 'Acesso negado. Token inválido ou não fornecido.' 
+    });
   }
 });
 
-// Registrar rotas do módulo
+// 2️⃣ Registro dos módulos do sistema
+app.register(authRoutes);
 app.register(workOrdersRoutes);
+app.register(webhooksRoutes, { prefix: '/webhooks' }); // 👈 2. Registro da rota de Webhooks
 
 const start = async () => {
   try {
