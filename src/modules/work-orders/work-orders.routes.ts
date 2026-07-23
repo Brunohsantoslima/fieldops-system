@@ -20,7 +20,7 @@ export async function workOrdersRoutes(app: FastifyInstance) {
   // 🗑️ Rota de Deleção (Barreira 1: Middleware de Role | Barreira 2: Service RBAC)
   app.delete(
     '/work-orders/:id',
-    { onRequest: [verifyUserRole(['ADMIN'])] },
+    { onRequest: [verifyUserRole(['admin'])] },
     controller.delete
   );
 }
