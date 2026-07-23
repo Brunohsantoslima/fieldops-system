@@ -1,3 +1,4 @@
+import cors from '@fastify/cors';
 import Fastify, { FastifyRequest, FastifyReply } from 'fastify';
 import fastifyJwt from '@fastify/jwt';
 import { workOrdersRoutes } from './modules/work-orders/work-orders.routes.js';
@@ -6,7 +7,10 @@ import { webhooksRoutes } from './modules/webhooks/webhooks.routes.js'; // 👈 
 import { errorHandler } from './error-handler.js';
 
 const app = Fastify({ logger: true });
-
+app.register(cors, {
+  origin: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+});
 app.setErrorHandler(errorHandler);
 
 const jwtSecret = process.env.JWT_SECRET;
