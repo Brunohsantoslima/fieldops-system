@@ -9,17 +9,17 @@ export async function workOrdersRoutes(app: FastifyInstance) {
 
   const controller = new WorkOrdersController();
 
-  // 📝 Rotas de Escrita adicionadas
-  app.post('/work-orders', controller.create);
-  app.patch('/work-orders/:id', controller.update);
+  // 📝 Rotas de Escrita
+  app.post('/', controller.create);
+  app.patch('/:id', controller.update);
 
   // 📖 Rotas de Leitura
-  app.get('/work-orders', controller.findAll);
-  app.get('/work-orders/:id', controller.findById);
+  app.get('/', controller.findAll);
+  app.get('/:id', controller.findById);
 
   // 🗑️ Rota de Deleção (Barreira 1: Middleware de Role | Barreira 2: Service RBAC)
   app.delete(
-    '/work-orders/:id',
+    '/:id',
     { onRequest: [verifyUserRole(['admin'])] },
     controller.delete
   );

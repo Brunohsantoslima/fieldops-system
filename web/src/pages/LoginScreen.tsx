@@ -1,5 +1,4 @@
 import { useAuth } from '../contexts/AuthContext'; 
-// OBS: ajuste os pontos (../) de acordo com onde a sua página de login está salva
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -44,6 +43,12 @@ export function LoginScreen() {
       
       // Feedback de sucesso
       setIsSuccess(true);
+
+      // 🚀 REDIRECIONAMENTO AUTOMÁTICO
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 1000);
+
     } catch (error: any) {
       if (error.response?.status === 401) {
         setGlobalError('E-mail ou senha incorretos.');
@@ -53,9 +58,6 @@ export function LoginScreen() {
     }
   };
 
-  
-
-  // ... resto das suas variáveis, estados e funções ...
   if (isSuccess) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center px-4">
@@ -64,7 +66,7 @@ export function LoginScreen() {
             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
           </div>
           <h2 className="text-2xl font-bold text-slate-900 mb-2">Login realizado com sucesso!</h2>
-          <p className="text-slate-600">O token JWT foi salvo. Em breve redirecionaremos para o painel.</p>
+          <p className="text-slate-600">O token JWT foi salvo. Redirecionando para o painel...</p>
         </div>
       </div>
     );

@@ -132,9 +132,17 @@ export class WorkOrdersService {
         orderBy: { createdAt: 'desc' },
         include: {
           checklist: true,
+          assignee: {
+            select: {
+              id: true,
+              name: true,
+            }
+          }
         },
       }),
-    ]);
+    ]); 
+
+    // A chave extra que estava aqui no meio foi removida!
 
     const totalPages = Math.ceil(total / perPage);
 

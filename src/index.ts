@@ -4,8 +4,9 @@ import fastifyJwt from '@fastify/jwt';
 import { workOrdersRoutes } from './modules/work-orders/work-orders.routes.js';
 import { authRoutes } from './modules/auth/auth.routes.js';
 import { webhooksRoutes } from './modules/webhooks/webhooks.routes.js';
-import { dashboardRoutes } from './modules/dashboard/routes.js'; // 👈 1. Import do Dashboard
+import { dashboardRoutes } from './modules/dashboard/routes.js';
 import { errorHandler } from './error-handler.js';
+import { prisma } from './lib/prisma.js'; // 👈 Import que estava faltando
 
 const app = Fastify({ logger: true });
 
@@ -37,11 +38,24 @@ app.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply
   }
 });
 
+// 1️⃣ Rota de Usuários
+app.get('/users', async (request, reply) => {
+  try {
+    const users = await prisma.user.findMany({
+      select: { id: true, name: true }
+    });
+    return users;
+  } catch (error) {
+    app.log.error(error);
+    return reply.status(500).send({ error: 'Erro ao buscar usuários' });
+  }
+});
+
 // 2️⃣ Registro dos módulos do sistema
 app.register(authRoutes);
-app.register(workOrdersRoutes);
+app.register(workOrdersRoutes, { prefix: '/work-orders' });
 app.register(webhooksRoutes, { prefix: '/webhooks' });
-app.register(dashboardRoutes, { prefix: '/dashboard' }); // 👈 2. Registro do Dashboard
+app.register(dashboardRoutes, { prefix: '/dashboard' });
 
 const start = async () => {
   try {

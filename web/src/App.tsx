@@ -1,33 +1,38 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './contexts/AuthContext';
 import { LoginScreen } from './pages/LoginScreen';
 import { Dashboard } from './pages/Dashboard';
-import type { JSX } from 'react/jsx-runtime';
-
-// Função que bloqueia quem não está logado
-function RotaPrivada({ children }: { children: JSX.Element }) {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? children : <Navigate to="/" />;
-}
+import { Layout } from './components/Layout';
+import { RotaPrivada } from './components/RotaPrivada';
+import { WorkOrders } from './pages/WorkOrders';
+import { WorkOrderDetails } from './pages/WorkOrderDetails';
+import { CreateWorkOrder } from './pages/CreateWorkOrder';
 
 export default function App() {
-  const { isAuthenticated } = useAuth();
-
   return (
     <BrowserRouter>
       <Routes>
-        {/* Se já estiver logado, não deixa ver o login de novo, manda pro dashboard */}
-        <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" /> : <LoginScreen />} />
-        
-        {/* Rota protegida do Dashboard */}
-        <Route 
-          path="/dashboard" 
+        {/* Rota pública de Login */}
+        <Route path="/login" element={<LoginScreen />} />
+
+        {/* Rotas protegidas envelopadas pelo Layout e RotaPrivada */}
+        <Route
           element={
             <RotaPrivada>
-              <Dashboard />
+              <Layout />
             </RotaPrivada>
-          } 
-        />
+          }
+        >
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          
+          {/* Módulo de Operações / Work Orders */}
+          <Route path="/work-orders" element={<WorkOrders />} />
+          <Route path="/work-orders/new" element={<CreateWorkOrder />} />
+          <Route path="/work-orders/:id" element={<WorkOrderDetails />} />
+        </Route>
+
+        {/* Redirecionamento padrão para rotas desconhecidas */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   );
