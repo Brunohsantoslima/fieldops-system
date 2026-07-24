@@ -1,0 +1,100 @@
+datasource db {
+  provider = "postgresql"
+  
+}
+
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+}
+
+enum Role {
+  technician
+  supervisor
+  admin
+}
+
+enum OrderStatus {
+  open
+  in_progress
+  done
+}
+
+enum Priority {
+  low
+  medium
+  high
+}
+
+model User {
+  id          String           @id @default(uuid())
+  email       String           @unique
+  password    String
+  name        String
+  role        Role
+  teamId      String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  workOrders  WorkOrder[]      @relation("Assignee")
+  auditEvents WorkOrderEvent[]
+
+  @@index([teamId])
+  @@map("flx_users")
+}
+
+model WorkOrder {
+  id              String           @id @default(uuid())
+  title           String
+  description     String?
+  status          OrderStatus      @default(open)
+  priority        Priority         @default(low)
+  resolutionNotes String?
+  assigneeId      String?
+  teamId          String
+  version         Int              @default(1)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  assignee        User?            @relation("Assignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  checklist       ChecklistItem[]
+  events          WorkOrderEvent[]
+
+  @@index([status])
+  @@index([assigneeId])
+  @@index([teamId])
+  @@map("flx_work_orders")
+}
+
+model ChecklistItem {
+  id          String    @id @default(uuid())
+  workOrderId String
+  label       String
+  completed   Boolean   @default(false)
+  workOrder   WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+
+  @@index([workOrderId])
+  @@map("flx_checklist_items")
+}
+
+model WorkOrderEvent {
+  id          String      @id @default(uuid())
+  workOrderId String
+  actorId     String
+  fromStatus  OrderStatus?
+  toStatus    OrderStatus
+  createdAt   DateTime    @default(now())
+  workOrder   WorkOrder   @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  actor       User        @relation(fields: [actorId], references: [id])
+
+  @@index([workOrderId])
+  @@index([actorId])
+  @@map("flx_work_order_events")
+}
+
+model Webhook {
+  id        String   @id @default(uuid())
+  url       String
+  secret    String
+  createdAt DateTime @default(now())
+
+  @@map("webhooks")
+}
