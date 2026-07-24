@@ -71,3 +71,20 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+  // Exemplo de OS inicial com checklist
+const workOrder = await prisma.workOrder.create({
+  data: {
+    title: 'Troca de compressor de refrigeração',
+    description: 'Equipamento apresentando ruído excessivo e falha no resfriamento.',
+    status: 'open',
+    priority: 'high',
+    teamId: 'team-alpha',
+    version: 1,
+    checklist: {
+      create: [
+        { label: 'Isolar a área de trabalho', completed: false },
+        { label: 'Verificar pressão do gás', completed: false },
+      ],
+    },
+  },
+});

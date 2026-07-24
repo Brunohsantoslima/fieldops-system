@@ -3,14 +3,17 @@ import Fastify, { FastifyRequest, FastifyReply } from 'fastify';
 import fastifyJwt from '@fastify/jwt';
 import { workOrdersRoutes } from './modules/work-orders/work-orders.routes.js';
 import { authRoutes } from './modules/auth/auth.routes.js';
-import { webhooksRoutes } from './modules/webhooks/webhooks.routes.js'; // 👈 1. Import do Webhook
+import { webhooksRoutes } from './modules/webhooks/webhooks.routes.js';
+import { dashboardRoutes } from './modules/dashboard/routes.js'; // 👈 1. Import do Dashboard
 import { errorHandler } from './error-handler.js';
 
 const app = Fastify({ logger: true });
+
 app.register(cors, {
   origin: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 });
+
 app.setErrorHandler(errorHandler);
 
 const jwtSecret = process.env.JWT_SECRET;
@@ -37,7 +40,8 @@ app.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply
 // 2️⃣ Registro dos módulos do sistema
 app.register(authRoutes);
 app.register(workOrdersRoutes);
-app.register(webhooksRoutes, { prefix: '/webhooks' }); // 👈 2. Registro da rota de Webhooks
+app.register(webhooksRoutes, { prefix: '/webhooks' });
+app.register(dashboardRoutes, { prefix: '/dashboard' }); // 👈 2. Registro do Dashboard
 
 const start = async () => {
   try {
