@@ -53,16 +53,20 @@ export function Layout() {
               Operações
             </Link>
 
-            <a
-              href="#"
-              className="block px-4 py-2.5 text-slate-400 hover:bg-slate-800 hover:text-white rounded-lg font-medium transition"
+            <Link
+              to="/equipes"
+              className={`block px-4 py-2.5 rounded-lg font-medium transition ${
+                isActive('/equipes')
+                  ? 'bg-blue-600 text-white'
+                  : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+              }`}
             >
               Equipes
-            </a>
+            </Link>
           </nav>
         </div>
 
-        {/* 🚀 BOTAO ATUALIZADO AQUI */}
+        {/* 🚀 BOTÃO ATUALIZADO AQUI */}
         <button
           onClick={handleLogout}
           className="w-full bg-slate-800 hover:bg-red-600 text-slate-300 hover:text-white py-2.5 px-4 rounded-lg font-medium transition text-left flex items-center justify-between"

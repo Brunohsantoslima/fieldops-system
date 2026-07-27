@@ -1,6 +1,5 @@
-import crypto from 'node:crypto';
+import crypto, { randomUUID } from 'node:crypto';
 import { prisma } from '../../lib/prisma.js';
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 export class WebhooksService {
   async create(data: { url: string; secret: string }) {
@@ -16,26 +15,26 @@ export class WebhooksService {
     return await prisma.webhook.findMany();
   }
 
-  async dispatchStatusChange(workOrder: any, fromStatus: string, toStatus: string) {
+  // 👇 Adicionamos o 'actorId' para bater com a documentação do payload
+  async dispatchStatusChange(workOrder: any, fromStatus: string, toStatus: string, actorId: string | number) {
     const webhooks = await prisma.webhook.findMany();
 
     if (webhooks.length === 0) return;
 
+    // 👇 O payload montado exatamente como a especificação exige
     const payload = {
-      event: 'work_order.status_changed',
-      timestamp: new Date().toISOString(),
-      data: {
-        workOrderId: workOrder.id,
-        fromStatus,
-        toStatus,
-        workOrder,
-      },
+      eventId: randomUUID(), // ID único do evento
+      workOrderId: workOrder.id,
+      fromStatus,
+      toStatus,
+      actorId,
+      occurredAt: new Date().toISOString(),
     };
 
     const payloadString = JSON.stringify(payload);
 
     const promises = webhooks.map(async (webhook: any) => {
-      // Gera a assinatura HMAC-SHA256 exigida
+      // Gera a assinatura HMAC-SHA256 apenas em hex
       const signature = crypto
         .createHmac('sha256', webhook.secret)
         .update(payloadString)
@@ -46,7 +45,8 @@ export class WebhooksService {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-signature': `sha256=${signature}`,
+            'X-Api-Revision': '2026.2', // Header exigido pela versão 2.2
+            'X-Signature': signature,   // Nome exato exigido na prova
           },
           body: payloadString,
         });

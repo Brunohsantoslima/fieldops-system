@@ -6,6 +6,7 @@ import { RotaPrivada } from './components/RotaPrivada';
 import { WorkOrders } from './pages/WorkOrders';
 import { WorkOrderDetails } from './pages/WorkOrderDetails';
 import { CreateWorkOrder } from './pages/CreateWorkOrder';
+import { Equipes } from './pages/Equipes';
 
 export default function App() {
   return (
@@ -29,6 +30,9 @@ export default function App() {
           <Route path="/work-orders" element={<WorkOrders />} />
           <Route path="/work-orders/new" element={<CreateWorkOrder />} />
           <Route path="/work-orders/:id" element={<WorkOrderDetails />} />
+
+          {/* Módulo de Equipes / Usuários */}
+          <Route path="/equipes" element={<Equipes />} />
         </Route>
 
         {/* Redirecionamento padrão para rotas desconhecidas */}

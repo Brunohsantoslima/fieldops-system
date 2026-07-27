@@ -20,3 +20,26 @@ export const loginSchema = {
     },
   },
 };
+// Adicione no final do arquivo src/modules/auth/auth.schema.ts
+export const registerSchema = {
+  body: {
+    type: 'object',
+    required: ['name', 'email', 'password', 'role'],
+    properties: {
+      name: { type: 'string', minLength: 3 },
+      email: { type: 'string', format: 'email' },
+      password: { type: 'string', minLength: 6 },
+      role: { type: 'string', enum: ['admin', 'supervisor', 'technician'] },
+      teamId: { type: 'string' },
+    },
+  },
+};
+
+// 2️⃣ Tipo TypeScript para ser usado no Controller/Service
+export type RegisterInput = {
+  name: string;
+  email: string;
+  password: string;
+  role: 'admin' | 'supervisor' | 'technician';
+  teamId?: string;
+};

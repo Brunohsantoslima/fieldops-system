@@ -1,8 +1,15 @@
 import { FastifyInstance } from 'fastify';
-import { authenticateService } from './auth.service.js';
-import { loginSchema, LoginInput } from './auth.schema.js';
-
+import { authenticateService, registerService } from './auth.service.js';
+import { loginSchema, LoginInput, registerSchema, RegisterInput } from './auth.schema.js';
 export async function authRoutes(app: FastifyInstance) {
+  // 1.5️⃣ Rota de Registro (Nova)
+  app.post('/register', { schema: registerSchema }, async (request, reply) => {
+    const body = request.body as RegisterInput;
+
+    const user = await registerService(body);
+
+    return reply.status(201).send({ user });
+  });
   // 1️⃣ Rota de Login (Pública)
   app.post('/login', { schema: loginSchema }, async (request, reply) => {
     const body = request.body as LoginInput;

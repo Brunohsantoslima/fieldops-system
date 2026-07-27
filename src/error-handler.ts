@@ -11,7 +11,20 @@ export function errorHandler(
   // Gera o ID único de rastreio exigido pela especificação
   const flxTraceId = randomUUID();
 
-  // 1️⃣ Erros de Validação (Zod ou Validador Nativo do Fastify)
+  // 1️⃣ Erros de Negócio da Aplicação (ex: concorrência, status inválido)
+  // DEVE VIR PRIMEIRO para não ser engolido pelo erro 400 genérico
+  if (error instanceof AppError) {
+    return reply.status(error.statusCode ?? 400).send({
+      error: {
+        code: error.code,
+        message: error.message,
+        flxTraceId,
+        details: (error as any).details || {} 
+      }
+    });
+  }
+
+  // 2️⃣ Erros de Validação (Zod ou Validador Nativo do Fastify)
   if (error instanceof ZodError || error.validation || error.statusCode === 400) {
     return reply.status(400).send({
       error: {
@@ -23,7 +36,7 @@ export function errorHandler(
     });
   }
 
-  // 2️⃣ Erros de Autenticação / JWT (sem token ou token inválido)
+  // 3️⃣ Erros de Autenticação / JWT (sem token ou token inválido)
   if (
     error.statusCode === 401 ||
     error.code?.startsWith('FST_JWT_') ||
@@ -35,19 +48,6 @@ export function errorHandler(
         message: 'Não autorizado: token ausente ou inválido.',
         flxTraceId,
         details: {}
-      }
-    });
-  }
-
-  // 3️⃣ Erros de Negócio da Aplicação (ex: concorrência, status inválido)
-  if (error instanceof AppError) {
-    return reply.status(error.statusCode ?? 400).send({
-      error: {
-        code: error.code,
-        message: error.message,
-        flxTraceId,
-        // Caso seu AppError tenha a propriedade details, a incluímos aqui:
-        details: (error as any).details || {} 
       }
     });
   }

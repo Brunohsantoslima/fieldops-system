@@ -254,7 +254,7 @@ export class WorkOrdersService {
 
     // 🚀 GATILHO DO WEBHOOK: Dispara apenas se o status tiver mudado
     if (statusChanged) {
-      this.webhooksService.dispatchStatusChange(result, existing.status, result.status)
+      this.webhooksService.dispatchStatusChange(result, existing.status, result.status, currentUser.sub)
         .catch(error => console.error('Falha ao disparar webhook:', error));
     }
 

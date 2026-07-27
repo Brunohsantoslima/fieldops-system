@@ -16,11 +16,12 @@ app.register(cors, {
 
 app.setErrorHandler(errorHandler);
 
-// 2. Health Check
+// 2. Health Check (Corrigido para a especificação da prova!)
 app.get('/health', async (request, reply) => {
   return reply.status(200).send({
     status: 'ok',
-    timestamp: new Date().toISOString()
+    apiRevision: '2026.2',
+    service: 'fieldops-lite'
   });
 });
 

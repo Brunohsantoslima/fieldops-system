@@ -45,6 +45,9 @@ export const updateWorkOrderSchema = z.object({
   assigneeId: z.string()
     .uuid('O ID do responsável deve ser um UUID válido.')
     .optional(),
+
+  // 👇 AQUI ESTÁ A CORREÇÃO DA VERSÃO
+  version: z.number().int('A versão deve ser um número inteiro').optional(),
 });
 
 export type UpdateWorkOrderDTO = z.infer<typeof updateWorkOrderSchema>;
