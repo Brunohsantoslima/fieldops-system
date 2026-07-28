@@ -10,9 +10,22 @@ interface User {
 }
 
 export function Equipes() {
-  // 🔐 TRAVA REAL: Pegamos o usuário do contexto e verificamos se ele é admin
-  const { user } = useAuth();
-  const isAdmin = user?.role === 'admin'; 
+  // 🔐 TRAVA REAL: Pegamos o token do contexto e decodificamos para verificar se é admin
+  const { token } = useAuth();
+  
+  let isAdmin = false;
+  if (token) {
+    try {
+      // O JWT tem 3 partes separadas por ponto. A do meio [1] é o payload (dados)
+      const payloadBase64 = token.split('.')[1];
+      const decodedPayload = JSON.parse(atob(payloadBase64));
+      
+      // Verifica se a role gravada no token é admin
+      isAdmin = decodedPayload.role === 'admin'; 
+    } catch (error) {
+      console.error('Erro ao decodificar o token:', error);
+    }
+  }
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
