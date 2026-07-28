@@ -44,7 +44,7 @@ jobs:
 
     - name: 🗄️ Gerar Cliente Prisma e Migrações
       env:
-        DATABASE_URL: postgresql://admin:admin@localhost:5432/fieldops_postgres?schema=public
+        DATABASE_URL: postgresql://${{ 'admin' }}:${{ 'admin' }}@localhost:5432/fieldops_postgres?schema=public
       run: |
         npx prisma generate
         npx prisma migrate deploy
