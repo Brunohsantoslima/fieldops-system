@@ -3,11 +3,12 @@ import { CreateWorkOrderDTO, UpdateWorkOrderDTO } from './dto/work-order.schema.
 import { Priority, OrderStatus, Prisma } from '@prisma/client'; 
 import { UserPayload } from '../../@types/fastify-jwt.js';
 import { AppError } from '../../errors/app-error.js';
-import { WebhooksService } from '../webhooks/webhooks.service.js'; // 👈 Importação adicionada
+import { WebhooksService } from '../webhooks/webhooks.service.js';
 
 export interface FindWorkOrdersFilter {
   page?: number;
   perPage?: number;
+  limit?: number; // 👈 Suporte para limit exigido pela suíte de testes
   status?: OrderStatus;
   teamId?: string;
   priority?: Priority;
@@ -98,11 +99,14 @@ export class WorkOrdersService {
   }
 
   // ---------------------------------------------------------
-  // 3️⃣ FIND ALL (Paginação oficial com perPage e meta.limit)
+  // 3️⃣ FIND ALL (Paginação oficial aceitando limit e perPage)
   // ---------------------------------------------------------
   async findAll(filters: FindWorkOrdersFilter = {}, currentUser: UserPayload) {
     const page = Math.max(1, Number(filters.page) || 1);
-    const perPage = Math.min(100, Math.max(1, Number(filters.perPage) || 20));
+    
+    // 👈 Aceita 'limit' (usado pelos testes) ou 'perPage', com fallback para 20
+    const rawLimit = filters.limit ?? filters.perPage ?? 20;
+    const perPage = Math.min(100, Math.max(1, Number(rawLimit)));
     const skip = (page - 1) * perPage;
 
     const { status, teamId, priority } = filters;
@@ -141,8 +145,6 @@ export class WorkOrdersService {
         },
       }),
     ]); 
-
-    // A chave extra que estava aqui no meio foi removida!
 
     const totalPages = Math.ceil(total / perPage);
 
@@ -223,7 +225,6 @@ export class WorkOrdersService {
       }
     }
 
-    // 👇 Salvando a transação em uma variável `result`
     const result = await prisma.$transaction(async (tx) => {
       const updatedWorkOrder = await tx.workOrder.update({
         where: { id },
@@ -252,13 +253,11 @@ export class WorkOrdersService {
       return updatedWorkOrder;
     });
 
-    // 🚀 GATILHO DO WEBHOOK: Dispara apenas se o status tiver mudado
     if (statusChanged) {
       this.webhooksService.dispatchStatusChange(result, existing.status, result.status, currentUser.sub)
         .catch(error => console.error('Falha ao disparar webhook:', error));
     }
 
-    // Retorna a OS atualizada
     return result; 
   }
 
