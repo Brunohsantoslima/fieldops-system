@@ -10,6 +10,8 @@ vi.mock('../../lib/prisma.js', () => ({
     workOrder: {
       create: vi.fn(),
       findFirst: vi.fn(),
+      findMany: vi.fn(), // 👈 Adicionado para paginação e escopo
+      count: vi.fn(),    // 👈 Adicionado para paginação e escopo
       update: vi.fn(),
       delete: vi.fn(),
     },
@@ -121,5 +123,56 @@ describe('WorkOrdersService - Testes Obrigatórios', () => {
     await service.update('os-1', { status: OrderStatus.in_progress, assigneeId: 'tech-1' }, mockAdminUser);
     
     expect(dispatchSpy).toHaveBeenCalled();
+  });
+
+  // 9️⃣
+  it('Deve retornar apenas as OS da equipe do usuário logado (Escopo)', async () => {
+    vi.mocked(prisma.workOrder.findMany).mockResolvedValue([
+      { id: 'os-1', teamId: 'team-1' },
+      { id: 'os-2', teamId: 'team-1' }
+    ] as any);
+    vi.mocked(prisma.workOrder.count).mockResolvedValue(2);
+
+    const result = await service.findAll({}, mockTechUser);
+    
+    // Verifica se o Prisma foi chamado com o filtro de teamId correto
+    expect(prisma.workOrder.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ teamId: 'team-1' })
+      })
+    );
+    expect(result.data).toHaveLength(2);
+  });
+
+  // 🔟
+  it('Deve respeitar o limite de itens por página na listagem (Paginação)', async () => {
+    vi.mocked(prisma.workOrder.findMany).mockResolvedValue([
+      { id: 'os-1' }, { id: 'os-2' }
+    ] as any);
+    vi.mocked(prisma.workOrder.count).mockResolvedValue(10);
+
+    // Simulando requisição da página 1 com limite de 2 itens
+    // Simulando requisição da página 1 com limite de 2 itens
+await service.findAll({ limit: 2, page: 1 } as any, mockAdminUser);
+    
+    expect(prisma.workOrder.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ take: 2, skip: 0 })
+    );
+  });
+
+  // 1️⃣1️⃣
+  it('Deve calcular o objeto meta corretamente na paginação', async () => {
+    vi.mocked(prisma.workOrder.findMany).mockResolvedValue([] as any);
+    vi.mocked(prisma.workOrder.count).mockResolvedValue(15); // 15 itens no total
+
+    // Simulando requisição da página 2 com limite de 5 itens
+const result = await service.findAll({ limit: 5, page: 2 } as any, mockAdminUser);
+    
+    expect(result.meta).toEqual({
+      total: 15,
+      page: 2,
+      limit: 5,
+      totalPages: 3 // 15 dividido por 5
+    });
   });
 });
