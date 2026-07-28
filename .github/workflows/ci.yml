@@ -40,7 +40,7 @@ jobs:
         cache: 'npm'
 
     - name: 📦 Instalar Dependências (Backend)
-      run: npm ci
+      run: npm install
 
     - name: 🗄️ Gerar Cliente Prisma e Migrações
       env:
