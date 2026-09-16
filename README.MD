@@ -1,17 +1,17 @@
-# 🛠️ FieldOps v2.2 — Módulo de Equipes & Work Orders
+#  FieldOps v2.2 — Módulo de Equipes & Work Orders
 
 > **Status do Projeto:** Entregue e Auditado ✅
 
 Bem-vindo ao repositório do **FieldOps v2.2**. Este projeto implementa o núcleo do sistema de controle de ordens de serviço (Work Orders) e a gestão de acesso baseada em papéis (RBAC) para equipes de campo. 
 
-## 🚀 1. A Jornada de Desenvolvimento (Dev Log)
+##  1. A Jornada de Desenvolvimento (Dev Log)
 
 O desenvolvimento deste módulo superou os seguintes desafios:
 *   **Orquestração de Infraestrutura:** Levantamos um banco de dados PostgreSQL empacotado em Docker, utilizando `dotenvx` para injeção limpa de variáveis.
 *   **A Crise de Sincronização:** Superamos um gargalo de versionamento, garantindo que o código de frontend e as lógicas de negócio fossem consolidadas na branch `main`.
 *   **Engenharia Reversa de Requisitos:** Validamos o sistema contra uma auditoria estrita, ajustando payloads de Webhooks, garantindo a idempotência e formatando o contrato de resposta de erros (`AppError`).
 
-## 🏗️ 2. Arquitetura e Stack Tecnológico
+##  2. Arquitetura e Stack Tecnológico
 
 ### Backend (Porta `3333`)
 *   **Runtime:** Node.js
@@ -25,26 +25,26 @@ O desenvolvimento deste módulo superou os seguintes desafios:
 *   **Framework:** React construído com Vite.
 *   **Integração:** Consumo da API REST e renderização condicional baseada nas funções (RBAC).
 
-## 🎯 3. Regras de Negócio Implementadas
+##  3. Regras de Negócio Implementadas
 
-### 🔐 Role-Based Access Control (RBAC)
+###  Role-Based Access Control (RBAC)
 *   **Admin:** Acesso total.
 *   **Supervisor:** Acesso restrito ao seu próprio time (`teamId`).
 *   **Técnico:** Acesso severamente limitado. Pode apenas visualizar as OS atribuídas a ele. Rotas não autorizadas retornam `403 FLX_FORBIDDEN`.
 ### Segurança e Controle de Acesso (RBAC) no Frontend
 Para garantir uma interface segura e ágil, o controle de acesso (RBAC) no lado do cliente é realizado através da decodificação nativa do token JWT. O payload do token é lido diretamente via JavaScript puro (utilizando `atob` para decodificação Base64), permitindo que o sistema verifique a *role* do usuário logado de forma imediata (ex: `admin`). Isso garante a renderização condicional de componentes sensíveis na UI, como a edição de equipes, sem a necessidade de importar bibliotecas externas pesadas para manipulação de tokens.
-### 🔄 Máquina de Estados da Work Order (OS)
+###  Máquina de Estados da Work Order (OS)
 As Ordens de Serviço respeitam um ciclo de vida estrito (`open` ➔ `in_progress` ➔ `done`), com as seguintes proteções (Edge Cases):
 1.  **Bloqueio de Prioridade:** Técnicos estão proibidos de concluir OS de prioridade `high`.
 2.  **Proteção de Checklist:** Bloqueio de retorno ao status `open` se houver itens concluídos pendentes.
 3.  **Auditoria de Resolução:** Mínimo de 10 caracteres nas notas.
 4.  **Auditoria Transacional:** Evento de auditoria gravado na mesma transação do Prisma.
 
-### ⚡ Concorrência e Webhooks
+### Concorrência e Webhooks
 *   **Controle de Concorrência Otimista:** Implementado via campo `version` garantindo prevenção de `FLX_CONCURRENT_UPDATE`.
 *   **Webhooks de Status:** Disparo automático com payload sanitizado e idempotência validada pelo `eventId`.
 
-## 💻 4. Como Rodar o Projeto Localmente
+##  4. Como Rodar o Projeto Localmente
 
 1. Suba o container do banco:
    `docker-compose up -d`
@@ -58,7 +58,7 @@ As Ordens de Serviço respeitam um ciclo de vida estrito (`open` ➔ `in_progres
    `npm install`
    `npm run dev`
 
-## 🗺️ 5. Diagrama do Fluxo Principal (Transição de Status)
+##  5. Diagrama do Fluxo Principal (Transição de Status)
 
 ```mermaid
 graph TD
@@ -70,7 +70,7 @@ graph TD
     F --> G[Dispara Webhook POST com HMAC]
     G --> H[200 OK]
 
-## 🏛️ 6. Architecture Decision Records (ADRs)
+##  6. Architecture Decision Records (ADRs)
 
 *   **ADR 001 - Concorrência Otimista (Optimistic Locking):** 
     *   **Contexto e Decisão:** Para evitar que dois usuários sobrescrevam as edições um do outro simultaneamente, optamos por usar um campo `version` (inteiro) na tabela `flx_work_orders` em vez de locks de banco de dados pessimistas.
@@ -86,7 +86,7 @@ graph TD
 
 ---
 
-## 👥 7. Usuários Seed (Credenciais de Teste)
+##  7. Usuários Seed (Credenciais de Teste)
 
 Para testar os diferentes escopos e papéis do sistema, utilize os usuários pré-configurados abaixo:
 
@@ -99,7 +99,7 @@ Para testar os diferentes escopos e papéis do sistema, utilize os usuários pr�
 
 ---
 
-## 🚧 8. Limitações Conhecidas
+##  8. Limitações Conhecidas
 
 Para mantermos o escopo de entrega focado nas regras de negócio principais e na robustez da API, assumimos as seguintes limitações:
 
