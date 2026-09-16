@@ -2,10 +2,10 @@
 
 Em conformidade com os requisitos de transparência e boas práticas de engenharia de software, este documento detalha como ferramentas de Inteligência Artificial foram utilizadas durante o desenvolvimento do projeto **FieldOps v2.2**.
 
-## 🛠️ Ferramentas Utilizadas
+##  Ferramentas Utilizadas
 *   **Gemini (Google):** Utilizado como assistente de codificação e auditor de arquitetura.
 
-## 🎯 Como a IA foi aplicada
+##  Como a IA foi aplicada
 
 A Inteligência Artificial foi empregada estritamente como um acelerador de produtividade (pair programming) e não como substituta para a tomada de decisão técnica. Os casos de uso incluíram:
 
@@ -15,7 +15,7 @@ A Inteligência Artificial foi empregada estritamente como um acelerador de prod
 4.  **Troubleshooting:** Diagnóstico rápido de erros de portas presas no Docker e conflitos de merge no Git.
 5. **Troubleshooting de Tipagem (TypeScript):** A IA foi utilizada para diagnosticar rapidamente um conflito de interface (`Property 'user' does not exist on type 'AuthContextData'`) no componente de gestão de equipes, garantindo o alinhamento correto entre o hook de autenticação e a tipagem estrita do React.
 6. **Lógica de Segurança no Frontend (JWT):** O assistente auxiliou na estruturação do algoritmo de decodificação nativa do JWT no client-side (utilizando `split`, `atob` e `JSON.parse`). Isso permitiu extrair as permissões do usuário em tempo real e aplicar as regras de negócio do RBAC na interface visual de forma leve e performática.
-## 🚫 O que foi feito exclusivamente de forma humana
+##  O que foi feito exclusivamente de forma humana
 
 Para garantir a autoria e a proficiência técnica exigidas pela avaliação, a IA **não** foi utilizada para conceber:
 
@@ -28,13 +28,13 @@ Para garantir a autoria e a proficiência técnica exigidas pela avaliação, a 
 * **Design System e UI/UX:** A construção visual da interface, navegação, componentização (modais, tabelas) e estilização responsiva utilizando Tailwind CSS, focando na melhor experiência do usuário final.
 * **Auditoria e Curadoria de Código:** Toda e qualquer sugestão ou bloco de código gerado por ferramentas de IA passou por um rigoroso *code review* humano. Nenhuma implementação foi aprovada sem validação de tipagem, segurança e alinhamento com as boas práticas exigidas pelo projeto.
 
-## ⚖️ Divergências com a Inteligência Artificial
+##  Divergências com a Inteligência Artificial
 
 Durante o desenvolvimento do controle de acesso no frontend (Equipes/RBAC), o assistente de IA sugeriu a instalação da biblioteca externa `jwt-decode` para extrair as roles do token JWT. 
 **Decisão:** Eu discordei e rejeitei a sugestão. 
 **Motivo:** Para um escopo onde apenas precisávamos ler as *claims* básicas (role e teamId), adicionar uma dependência extra ao *bundle* do React seria um exagero. Optei por implementar uma solução nativa e mais leve utilizando `atob()` e `JSON.parse()`, garantindo a mesma funcionalidade com zero impacto no tamanho do pacote.
 
-## 🚧 Limitações Conhecidas (Trade-offs)
+##  Limitações Conhecidas (Trade-offs)
 
 Devido ao escopo de tempo (12 a 16 horas estimadas) e foco na estabilidade das regras de negócio, as seguintes limitações foram aceitas nesta entrega:
 *   **Suporte Offline:** A aplicação frontend não possui cache avançado (Service Workers/PWA) para permitir que técnicos preencham o checklist de OS em áreas sem cobertura de rede.
